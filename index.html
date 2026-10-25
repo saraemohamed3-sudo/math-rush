@@ -1,10 +1,4 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
-  <link rel="manifest" href="manifest.json">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<meta property="og:image" content="https://saraemohamed3-sudo.github.io/math-rush/icon-512.png">
-<meta name="twitter:image" content="https://saraemohamed3-sudo.github.io/math-rush/icon-512.png">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Math Rush: Number Arena</title>
 <meta name="description" content="Math Rush: a fast, fun math game. Race the clock, answer + − × ÷ questions, earn badges and customize your player. Free to play in English and Arabic.">
@@ -13,7 +7,8 @@
 <meta property="og:description" content="Race the clock, solve math challenges, earn badges and level up your player.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<script src="https://game-cdn.poki.com/scripts/v2/poki-sdk.js"></script>
+
+<script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--wood:#a8672a;--paper:#f8e8bd;--ink:#3a2a14}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
@@ -330,7 +325,7 @@ html[lang=ar] *{letter-spacing:0!important}
 #lg:active,#hlp:active{transform:scale(.9)}
 /* ===== v10: fit desktop windows (Edge etc.) ===== */
 @media(min-aspect-ratio:1/1){.cz{font-size:min(1em,3.2vh)}}
-#hm .czc{overflow:hidden;width:min(34em,94vw)}
+#hm .czc{overflow-y:auto;overflow-x:hidden;width:min(34em,94vw);-webkit-overflow-scrolling:touch}#hm .czc>*{flex-shrink:0}
 #hlist{overflow-y:auto;min-height:0;flex:1 1 auto;width:100%;margin:0}
 #hm #hgot{flex:none}
 .tb{min-width:0!important;padding:.22em .2em!important;font-size:.95em!important}
@@ -352,6 +347,7 @@ html[lang=ar] *{letter-spacing:0!important}
 #app #game .opts .b{font-size:1.45em;padding:.85em .15em}
 }
 </style>
+<style id="no-home-btn">#bk{display:none!important}</style>
 </head><body><div id="app">
 <svg width="0" height="0" style="position:absolute"><defs><symbol id="H" viewBox="0 0 120 150">
 <g style="opacity:var(--aura,0)"><ellipse class="aura" cx="60" cy="82" rx="58" ry="68" fill="#ffd52f" opacity=".30"/><ellipse class="aura a2" cx="60" cy="82" rx="46" ry="58" fill="#fff3a0" opacity=".30"/></g>
@@ -445,7 +441,7 @@ html[lang=ar] *{letter-spacing:0!important}
 <div class="cz" id="prm"><div class="czc"><h2 data-i="practice">🎯 PRACTICE</h2><div class="czrow"><span data-i="pOpL">OPERATION</span><div class="czrow" id="pops"></div></div><div class="czrow" id="ptrow"><span data-i="pTabL">TABLE</span><div class="czrow wrap" id="ptab"></div></div><div class="czrow" id="plrow"><span data-i="pLvL">LEVEL</span><div class="czrow wrap" id="plv"></div></div><div style="font-size:.75em;opacity:.8" data-i="pracNote">No hearts. No timer.</div><button class="b g" id="pgo" data-i="start">▶ START</button></div></div>
 <div class="cz" id="hm"><div class="czc"><h2 data-i="howTitle">HOW TO PLAY</h2><ul class="hl" id="hlist"></ul><button class="b g" id="hgot" data-i="gotit">✔ GOT IT!</button></div></div>
 <div class="cz" id="bm"><div class="czc"><h2><span data-i="badgesTitle">BADGES</span> <small id="bcount"></small></h2><div class="bgrid" id="bgrid"></div><button class="b g" id="bdone" data-i="done">✔ DONE</button></div></div>
-<button class="nav" id="ps" aria-label="Pause">⏸</button>
+<button class="nav" id="ps" aria-label="Menu">⚙️</button>
 <button class="nav" id="bk" aria-label="Home">🏠</button><button class="nav" id="sd" aria-label="Sound">🔊</button>
 
 <section class="s on" id="home"><button class="nav" id="lg" aria-label="Language">🌐</button><button class="nav" id="hlp" aria-label="How to play">❓</button><div class="row"><div class="hero"><svg width="100%" height="100%"><use href="#H" width="100%" height="100%"/></svg></div><div class="col"><h1 class="t">MATH<br>RUSH<small data-i="sub">THE NUMBER ARENA</small></h1><button class="b g" id="play" data-i="start" style="font-size:1.55em;margin-top:.6em">▶ START</button><div class="hbtns" id="hrow"><button class="b p" id="prac" data-i="practice">🎯 PRACTICE</button><button class="b bl" id="cz" data-i="cust">👕 CUSTOMIZE</button><button class="b bl" id="bgb" data-i="badges">🏅 BADGES</button></div><div class="home-record" id="homeRecord">🏆 BEST: 0 PTS&nbsp; · &nbsp;LEVEL 1</div></div></div></section>
@@ -461,37 +457,52 @@ html[lang=ar] *{letter-spacing:0!important}
 </div>
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),fmt=n=>n.toLocaleString('en-US');
-// Poki SDK hooks (safe if the SDK is missing, e.g. when opened locally)
-let platformPlaying=false,pokiReady=false,adBusy=false;
-const sdk=()=>window.PokiSDK||null;
+// CrazyGames SDK v3 hooks (safe if the SDK is missing, e.g. when opened locally)
+let platformPlaying=false,sdkReady=false,adBusy=false,sdkMute=false;
+const sdk=()=>(window.CrazyGames&&window.CrazyGames.SDK)||null;
 function platformStart(){
-  if(platformPlaying)return;
+  if(platformPlaying||!sdkReady)return;
   platformPlaying=true;
-  try{const k=sdk();if(k&&typeof k.gameplayStart==='function')k.gameplayStart()}catch(e){}
+  try{const k=sdk();if(k&&k.game)k.game.gameplayStart()}catch(e){}
 }
 function platformStop(){
   if(!platformPlaying)return;
   platformPlaying=false;
-  try{const k=sdk();if(k&&typeof k.gameplayStop==='function')k.gameplayStop()}catch(e){}
+  try{const k=sdk();if(k&&k.game)k.game.gameplayStop()}catch(e){}
 }
+// Saves go to the CrazyGames Data module (cloud) when available, and always to localStorage as a backup.
+const store={
+  get(k){
+    try{if(sdkReady){const d=sdk().data;if(d&&typeof d.getItem==='function'){const v=d.getItem(k);if(v!==null&&v!==undefined)return v}}}catch(e){}
+    try{return localStorage.getItem(k)}catch(e){return null}
+  },
+  set(k,v){
+    try{if(sdkReady){const d=sdk().data;if(d&&typeof d.setItem==='function')d.setItem(k,v)}}catch(e){}
+    try{localStorage.setItem(k,v)}catch(e){}
+  }
+};
+function happy(){try{const k=sdk();if(sdkReady&&k&&k.game&&typeof k.game.happytime==='function')k.game.happytime()}catch(e){}}
 function sdkInit(){
   try{const k=sdk();if(k&&typeof k.init==='function'){
-    k.init().then(()=>{pokiReady=true;try{k.gameLoadingFinished()}catch(e){}}).catch(()=>{pokiReady=false;try{k.gameLoadingFinished()}catch(e){}});
+    Promise.resolve(k.init()).then(()=>{sdkReady=true;try{k.game.loadingStart();k.game.loadingStop()}catch(e){}
+      try{reloadSaved()}catch(e){}
+      try{const g=k.game;sdkMute=!!(g.settings&&g.settings.muteAudio);if(typeof g.addSettingsChangeListener==='function')g.addSettingsChangeListener(st=>{sdkMute=!!(st&&st.muteAudio)})}catch(e){}}).catch(()=>{sdkReady=false});
   }}catch(e){}
 }
-// Runs cb after a Poki commercial break (sound muted during the ad). Runs cb immediately if no SDK.
+// Runs cb after a CrazyGames midgame ad (sound muted during the ad). Runs cb immediately if no SDK / no ad.
 function withBreak(cb){
   if(adBusy)return;
   platformStop();
   const k=sdk();
-  if(!pokiReady||!k||typeof k.commercialBreak!=='function'){cb();return}
-  adBusy=true;const was=snd;let done=false;
+  if(!sdkReady||!k||!k.ad||typeof k.ad.requestAd!=='function'){cb();return}
+  adBusy=true;const was=snd;let done=false,started=false;
   const fin=()=>{if(done)return;done=true;adBusy=false;snd=was;cb()};
-  try{const p=k.commercialBreak(()=>{snd=false});if(p&&typeof p.then==='function')p.then(fin,fin);else fin()}catch(e){fin()}
+  try{k.ad.requestAd('midgame',{adStarted:()=>{started=true;snd=false},adFinished:fin,adError:fin})}catch(e){fin()}
+  setTimeout(()=>{if(!started)fin()},4000); // SDK never answered (e.g. ads off): don't keep the player waiting
   setTimeout(fin,90000);
 }
 sdkInit();
-// stop arrow keys / space from scrolling the Poki page
+// stop arrow keys / space from scrolling the page
 addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)&&!/^(INPUT|TEXTAREA)$/.test((e.target||{}).tagName||'')&&!(e.key===' '&&(e.target||{}).tagName==='BUTTON'))e.preventDefault()},{passive:false});
 
 const REVIVE=2;
@@ -530,7 +541,7 @@ ar:{sub:'ساحة الأرقام',start:'▶ ابدأ',cust:'👕 تخصيص',ba
  badgesTitle:'الإنجازات',newBadges:'إنجازات جديدة!',badgeWord:'إنجاز!',
  badge:{first:['أول فوز','اكسب أول جولة'],streak5:['مولّعها','5 إجابات صح ورا بعض'],streak10:['مفيش حد يوقفك','10 إجابات صح ورا بعض'],nohint:['من غير مساعدة','اكسب جولة من غير تلميحات'],perfect:['جولة مثالية','اكسب جولة من غير ما تخسر قلب'],comeback:['العودة القوية','اكسب جولة وفاضلك قلب واحد'],fast5:['سريع زي الصاروخ','5 بونص سرعة في جولة واحدة'],champ:['البطل','وصّل للمستوى 8'],marathon:['الماراثون','اكسب 3 جولات ورا بعض']}}
 };
-let lang='en';try{lang=localStorage.getItem(LANG_KEY)||'en'}catch(e){}if(!L[lang])lang='en';
+let lang='en';try{lang=store.get(LANG_KEY)||'en'}catch(e){}if(!L[lang])lang='en';
 const tr=(k,...a)=>{const v=L[lang][k];return typeof v==='function'?v(...a):v};
 function applyLang(){const ar=lang==='ar';document.documentElement.lang=lang;document.documentElement.dir=ar?'rtl':'ltr';
   $$('[data-i]').forEach(e=>{e.textContent=tr(e.dataset.i)});
@@ -539,9 +550,9 @@ function applyLang(){const ar=lang==='ar';document.documentElement.lang=lang;doc
   renderHomeRecord();refreshHint()}
 /* ===== Badges ===== */
 const BADGE_KEY='mathRushBadges',BADGE_ICONS={first:'🥉',streak5:'🔥',streak10:'⚡',nohint:'🧠',perfect:'💎',comeback:'💪',fast5:'🚀',champ:'🏆',marathon:'🏃'};
-function loadBadges(){try{const a=JSON.parse(localStorage.getItem(BADGE_KEY));return new Set(Array.isArray(a)?a:[])}catch(e){return new Set()}}
+function loadBadges(){try{const a=JSON.parse(store.get(BADGE_KEY));return new Set(Array.isArray(a)?a:[])}catch(e){return new Set()}}
 let badgeSet=loadBadges(),roundBadges=[],winsRow=0,rs={hints:0,lost:0,speed:0,miss:new Set()};
-function unlock(id){if(badgeSet.has(id)||!BADGE_ICONS[id])return;badgeSet.add(id);try{localStorage.setItem(BADGE_KEY,JSON.stringify([...badgeSet]))}catch(e){}
+function unlock(id){if(badgeSet.has(id)||!BADGE_ICONS[id])return;badgeSet.add(id);happy();try{store.set(BADGE_KEY,JSON.stringify([...badgeSet]))}catch(e){}
   roundBadges.push(id);const d=document.createElement('div');d.className='tierup bt';d.textContent='🏅 '+tr('badgeWord')+' '+BADGE_ICONS[id]+' '+tr('badge')[id][0];$('#app').appendChild(d);setTimeout(()=>d.remove(),2200);setTimeout(()=>beep(1047,.12),150)}
 function renderBadges(){const g=$('#bgrid'),bn=tr('badge'),ids=Object.keys(BADGE_ICONS);g.innerHTML='';
   ids.forEach(id=>{const on=badgeSet.has(id),c=document.createElement('div');c.className='bc'+(on?'':' lock');c.innerHTML='<i>'+(on?BADGE_ICONS[id]:'🔒')+'</i><b>'+bn[id][0]+'</b><span>'+bn[id][1]+'</span>';g.appendChild(c)});
@@ -551,14 +562,14 @@ function renderRoundBadges(){const box=$('#rbadges'),bn=tr('badge');box.innerHTM
     roundBadges.forEach(id=>{const c=document.createElement('span');c.className='chip';c.textContent=BADGE_ICONS[id]+' '+bn[id][0];box.appendChild(c)})}}
 const MAXH=3;
 const RECORD_KEY='mathRushNumberArenaRecords';
-function loadRecords(){let raw={};try{raw=JSON.parse(localStorage.getItem(RECORD_KEY))||{}}catch(e){}
+function loadRecords(){let raw={};try{raw=JSON.parse(store.get(RECORD_KEY))||{}}catch(e){}
   const blank=()=>({bestScore:0,bestLevel:1,totalWins:0});
   if(!raw.byDiff)raw={byDiff:raw.bestScore!==undefined?{normal:{bestScore:raw.bestScore||0,bestLevel:raw.bestLevel||1,totalWins:raw.totalWins||0}}:{}};
   ['kids','normal','hard'].forEach(d=>raw.byDiff[d]=Object.assign(blank(),raw.byDiff[d]));return raw}
-function saveRecords(r){try{localStorage.setItem(RECORD_KEY,JSON.stringify(r))}catch(e){}}
+function saveRecords(r){try{store.set(RECORD_KEY,JSON.stringify(r))}catch(e){}}
 function renderHomeRecord(){const r=loadRecords().byDiff[diff];$('#homeRecord').textContent=tr('record',r.bestScore,r.bestLevel,r.totalWins)}
 
-function beep(f,d=.12,tp='sine'){if(!snd)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=tp;o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
+function beep(f,d=.12,tp='sine'){if(!snd||sdkMute)return;try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();const o=ac.createOscillator(),g=ac.createGain();o.type=tp;o.frequency.value=f;g.gain.value=.07;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
 const win=()=>[523,659,784].forEach((f,i)=>setTimeout(()=>beep(f,.15),i*110)),lose=()=>[300,220].forEach((f,i)=>setTimeout(()=>beep(f,.25,'sawtooth'),i*160));
 function show(id){setTimeout(()=>setTier(false),0);$$('.s').forEach(e=>e.classList.toggle('on',e.id==id));$('#bk').style.display=id=='game'?'block':'none';$('#sd').style.display=id=='game'?'':'none';$('#ps').style.display=id=='game'?'block':'none';if(id!='game')$('#app').classList.remove('night')}
 function view(v){if(v!='qv')tOn=false;$$('.hero.worry').forEach(h=>h.classList.remove('worry'));['qv','okv','nov'].forEach(x=>$('#'+x).style.display=x==v?'flex':'none');$('#app').classList.toggle('night',v=='nov')}
@@ -647,9 +658,10 @@ function tick(){if(!tOn)return;const l=Math.max(0,(qEnd-Date.now())/1000),sc=Mat
   const wh=$('#qv .hero');if(wh)wh.classList.toggle('worry',l>0&&l<=5);
   if(l>0&&l<=3&&sc!==lastSec){lastSec=sc;beep(660,.06)}
   if(l<=0){tOn=false;streak=0;triedWrong=true;if(practice){lose();oops(tr('timeup'));view('nov');return}rs.lost++;rs.miss.add(qn);hearts--;hud();lose();if(hearts<=0)end(false);else{oops(tr('timeup'));view('nov')}}}
-function startLevel(){withBreak(startLevelNow)}
+let firstLevelStarted=false;
+function startLevel(){if(!firstLevelStarted){firstLevelStarted=true;startLevelNow();return}withBreak(startLevelNow)}
 function startLevelNow(){runId++;hintsLeft=3;hearts=MAXH;score=0;qn=0;streak=0;paused=false;$('#pm').classList.remove('on');rs={hints:0,lost:0,speed:0,miss:new Set()};roundBadges=[];t0=Date.now();$('#okv .plus').textContent=tr('plus',10);hud();newQ();show('game');platformStart();clearInterval(tmr);tmr=setInterval(tick,100)}
-function end(w,up){clearInterval(tmr);tOn=false;paused=false;$('#pm').classList.remove('on');platformStop();
+function end(w,up){clearInterval(tmr);tOn=false;paused=false;$('#pm').classList.remove('on');platformStop();if(w)happy();
   const all=loadRecords(),r=all.byDiff[diff];
   if(w&&!practice){r.bestScore=Math.max(r.bestScore,score);r.bestLevel=Math.max(r.bestLevel,levelBase+Math.floor((QN-1)/4));r.totalWins=(r.totalWins||0)+1;saveRecords(all)}
   renderHomeRecord();
@@ -666,15 +678,15 @@ function end(w,up){clearInterval(tmr);tOn=false;paused=false;$('#pm').classList.
 }
 function beginRun(){practice=false;practiceOp=null;practiceTab=0;roundNo=1;levelBase=1;lvl=1;totalPoints=0;winsRow=0;startLevel()}
 let helpStart=false;
-const helpSeen=()=>{try{return localStorage.getItem(HELP_KEY)==='1'}catch(e){return true}};
+const helpSeen=()=>{try{return store.get(HELP_KEY)==='1'}catch(e){return true}};
 function openHelp(first){helpStart=!!first;const ul=$('#hlist');ul.innerHTML='';tr('help').forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});$('#hm').classList.add('on')}
-function closeHelp(){$('#hm').classList.remove('on');try{localStorage.setItem(HELP_KEY,'1')}catch(e){}if(helpStart){helpStart=false;beginRun()}}
+function closeHelp(){$('#hm').classList.remove('on');try{store.set(HELP_KEY,'1')}catch(e){}if(helpStart){helpStart=false;beginRun()}}
 $('#play').onclick=()=>{if(helpSeen())beginRun();else openHelp(true)};
 $('#hlp').onclick=()=>openHelp(false);$('#hgot').onclick=closeHelp;
 $('#hm').addEventListener('click',e=>{if(e.target.id==='hm')closeHelp()});
 $('#bgb').onclick=()=>{renderBadges();$('#bm').classList.add('on')};$('#bdone').onclick=()=>$('#bm').classList.remove('on');
 $('#bm').addEventListener('click',e=>{if(e.target.id==='bm')$('#bm').classList.remove('on')});
-$('#lg').onclick=()=>{lang=lang==='ar'?'en':'ar';try{localStorage.setItem(LANG_KEY,lang)}catch(e){}applyLang()};
+$('#lg').onclick=()=>{lang=lang==='ar'?'en':'ar';try{store.set(LANG_KEY,lang)}catch(e){}applyLang()};
 function pauseGame(){if(paused||!tOn||!$('#game').classList.contains('on')||$('#qv').style.display!=='flex')return;paused=true;pRem=Math.max(0,qEnd-Date.now());tOn=false;platformStop();$('#pm').classList.add('on')}
 function resumeGame(){if(!paused)return;paused=false;$('#pm').classList.remove('on');qEnd=Date.now()+pRem;tOn=true;platformStart();tick()}
 $('#ps').onclick=pauseGame;$('#pres').onclick=resumeGame;
@@ -692,12 +704,14 @@ function reviveGrant(){runId++;hearts=REVIVE;paused=false;streak=0;$('#pm').clas
 function reviveAd(){
   if(adBusy)return;
   const k=sdk(),btn=$('#revive');
-  if(!k||typeof k.rewardedBreak!=='function'){reviveGrant();return} // no SDK (local testing): just continue
-  adBusy=true;const was=snd;snd=false;btn.disabled=true;let done=false;
-  const fin=ok=>{if(done)return;done=true;adBusy=false;snd=was;btn.disabled=false;
-    if(ok)reviveGrant();else{btn.textContent=tr('noAd');setTimeout(()=>{btn.textContent=tr('revive')},2200)}};
-  try{const p=k.rewardedBreak();if(p&&typeof p.then==='function')p.then(r=>fin(!!r),()=>fin(false));else fin(false)}catch(e){fin(false)}
-  setTimeout(()=>fin(false),180000);
+  // The player should never be punished for a missing ad (ads are off during Basic Launch, can be unfilled, or blocked):
+  // whether the ad finishes or can't be shown, the player gets the hearts and continues.
+  if(!k||!sdkReady||!k.ad||typeof k.ad.requestAd!=='function'){reviveGrant();return}
+  adBusy=true;const was=snd;btn.disabled=true;let done=false,started=false;
+  const fin=()=>{if(done)return;done=true;adBusy=false;snd=was;btn.disabled=false;reviveGrant()};
+  try{k.ad.requestAd('rewarded',{adStarted:()=>{started=true;snd=false},adFinished:fin,adError:fin})}catch(e){fin()}
+  setTimeout(()=>{if(!started)fin()},4000);
+  setTimeout(fin,180000);
 }
 $('#revive').onclick=reviveAd;
 $('#again').onclick=()=>{totalPoints=Math.max(0,totalPoints-score);winsRow=0;startLevel()};
@@ -716,8 +730,8 @@ document.addEventListener('visibilitychange',()=>{const on=$('#game').classList.
   else if(on&&!paused&&!adBusy)platformStart()});
 /* ===== Player customization ===== */
 const KIT_KEY='mathRushHeroKit',SHIRTS=[['#20b7a0','#167d78','#fff'],['#e5484d','#a82a30','#fff'],['#3b8cff','#1b55c4','#fff'],['#ffb020','#c27a00','#173348'],['#a85cf0','#6a2bc0','#fff'],['#f5f7fa','#b9c2cc','#173348']],HAIRS=['#49301f','#16161d','#c4552b','#3b8cff','#8a8f99'];
-function loadKit(){try{const k=JSON.parse(localStorage.getItem(KIT_KEY));if(k&&k.s>=0&&k.s<SHIRTS.length&&k.h>=0&&k.h<HAIRS.length&&k.n>=0&&k.n<=99)return k}catch(e){}return{s:0,h:0,n:7}}
-function saveKit(){try{localStorage.setItem(KIT_KEY,JSON.stringify(kit))}catch(e){}}
+function loadKit(){try{const k=JSON.parse(store.get(KIT_KEY));if(k&&k.s>=0&&k.s<SHIRTS.length&&k.h>=0&&k.h<HAIRS.length&&k.n>=0&&k.n<=99)return k}catch(e){}return{s:0,h:0,n:7}}
+function saveKit(){try{store.set(KIT_KEY,JSON.stringify(kit))}catch(e){}}
 let kit=loadKit();
 function applyKit(){const r=document.documentElement.style,c=SHIRTS[kit.s];r.setProperty('--jersey',c[0]);r.setProperty('--jersey2',c[1]);r.setProperty('--numc',c[2]);r.setProperty('--hair',HAIRS[kit.h]);const t=$('#H .num');if(t)t.textContent=kit.n;$('#czn').textContent=kit.n}
 function swatches(box,list,key){box.innerHTML='';list.forEach((c,i)=>{const b=document.createElement('button');b.className='sw'+(kit[key]===i?' sel':'');b.style.background=Array.isArray(c)?c[0]:c;b.setAttribute('aria-label','Color '+(i+1));b.onclick=()=>{kit[key]=i;kitChanged()};box.appendChild(b)})}
@@ -732,6 +746,10 @@ addEventListener('keydown',e=>{
   if(e.key==='Escape'){if($('#pm').classList.contains('on'))resumeGame();else if($('#czm').classList.contains('on'))closeCz();else if($('#prm').classList.contains('on'))$('#prm').classList.remove('on');else if($('#hm').classList.contains('on'))closeHelp();else if($('#bm').classList.contains('on'))$('#bm').classList.remove('on');else pauseGame()}
   else if(e.key==='p'||e.key==='P'){paused?resumeGame():pauseGame()}
 });
+function reloadSaved(){
+  lang=store.get(LANG_KEY)||lang;if(!L[lang])lang='en';
+  badgeSet=loadBadges();kit=loadKit();applyKit();applyLang();
+}
 applyKit();
 applyLang();show('home');
 
